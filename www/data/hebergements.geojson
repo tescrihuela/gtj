@@ -1,0 +1,10 @@
+{
+"type": "FeatureCollection",
+"name": "hebergements",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "url": "https://www.restaurant-chaletdelafrasse.com/", "nom": "Chalet de la Frasse" }, "geometry": { "type": "Point", "coordinates": [ 6.031090531076378, 46.425098813722208 ] } },
+{ "type": "Feature", "properties": { "url": "https://www.laguienette.fr/", "nom": "La Guienette" }, "geometry": { "type": "Point", "coordinates": [ 5.907099096937605, 46.295727915113858 ] } },
+{ "type": "Feature", "properties": { "url": "https://gralet.mon-paysdegex.fr/default_main.php", "nom": "Chalet du Gralet" }, "geometry": { "type": "Point", "coordinates": [ 5.898026201349956, 46.214496623379354 ] } }
+]
+}

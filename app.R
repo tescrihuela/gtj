@@ -7,11 +7,13 @@ suppressMessages(library(rgdal))
 
 #### Input data ####
 trace <- readOGR("www/data/trace.geojson", encoding = 'utf8')
+trek <- readOGR("www/data/trek_final.geojson", encoding = 'utf8')
 gtj_pied <- readOGR("www/data/gtj_pied.geojson", encoding = 'utf8')
 gtj_raquettes <- readOGR("www/data/gtj_raquettes.geojson", encoding = 'utf8')
-# heberg <- readRDS("www/data/hebergements.rds")
+heberg <- readOGR("www/data/hebergements.geojson")
 dep_arr <- readOGR("www/data/departs_arrivees.geojson", encoding = 'utf8')
-dep_arr_icon <- makeIcon("www/svg/accommodation_youth_hostel.svg", 30, 30)
+dep_arr_icon <- makeIcon("www/svg/transport_train_station2.svg", 30, 30)
+heberg_icon <- makeIcon("www/svg/accommodation_youth_hostel.svg", 30, 30)
 
 #### Infobulles ####
 trace$tooltip <- sprintf(
@@ -19,12 +21,20 @@ trace$tooltip <- sprintf(
   <strong>Longueur : </strong>%s km<br>",
   trace$nom, round(trace$longueur/1000, 1)
 ) %>% lapply(htmltools::HTML)
-# heberg$tooltip <- sprintf(
-#   "<h5>%s</h5>
-#   <strong>URL : </strong><a href=%s target=_blank>%s</a><br>",
-#   heberg$nom, heberg$url, heberg$url
-# ) %>% lapply(htmltools::HTML)
-
+trek$tooltip <- sprintf(
+  "<strong>Trace : </strong>%s<br>
+  <strong>Longueur : </strong>%s km<br>",
+  trek$nom, round(trek$longueur/1000, 1)
+) %>% lapply(htmltools::HTML)
+heberg$tooltip <- sprintf(
+  "<h5>%s</h5>
+  <strong>URL : </strong><a href=%s target=_blank>%s</a><br>",
+  heberg$nom, heberg$url, heberg$url
+) %>% lapply(htmltools::HTML)
+pal <- colorFactor(
+  palette = c('red', 'blue', 'purple', 'orange'),
+  domain = trek$nom
+)
 
 ####  UI  ####
 ui <- fluidPage(
@@ -65,7 +75,7 @@ server <- function(input, output, session) {
       data = gtj_pied,
       stroke = TRUE,
       dashArray =  "5",
-      color = "blue",
+      color = "purple",
       group = "GTJ Pied",
       weight = 5,
       # popup = trace$tooltip,
@@ -81,7 +91,7 @@ server <- function(input, output, session) {
       data = gtj_raquettes,
       stroke = TRUE,
       dashArray =  "5",
-      color = "purple",
+      color = "blue",
       group = "GTJ Raquettes",
       weight = 5,
       # popup = trace$tooltip,
@@ -108,11 +118,34 @@ server <- function(input, output, session) {
         bringToFront = TRUE
       )
     ) %>%
+
+    addPolylines(
+      data = trek,
+      stroke = TRUE,
+      dashArray =  "5",
+      color = ~pal(nom),
+      group = "Trek",
+      weight = 5,
+      popup = trek$tooltip,
+      label = trek$tooltip,
+      highlightOptions = highlightOptions(
+        color = "#b16694", 
+        weight = 3,
+        bringToFront = TRUE
+      )
+    ) %>%
     
     addMarkers(
       data = dep_arr,
       icon = dep_arr_icon,
       label = dep_arr$nom,
+      group = "Gares"
+    ) %>% 
+    
+    addMarkers(
+      data = heberg,
+      icon = heberg_icon,
+      label = heberg$nom,
       group = "Départs / Arrivées"
     ) %>% 
 
@@ -126,12 +159,12 @@ server <- function(input, output, session) {
 
     addLayersControl(
       baseGroups = c("OSM", "OpenTopoMap", "Orthos", "Plan IGN"),
-      overlayGroups = c("GTJ Pied", "GTJ Raquettes", "Trace initiale", "Départs / Arrivées"),
+      overlayGroups = c("GTJ Pied", "GTJ Raquettes", "Trace initiale", "Départs / Arrivées", "Trek"),
       position = "topright",
       options = layersControlOptions(collapsed = FALSE)
     ) %>% 
     
-    hideGroup("Trace initiale")
+    hideGroup(c("Trace initiale", "GTJ Raquettes", "GTJ Pied"))
   })
 }
 
